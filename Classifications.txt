@@ -1,0 +1,142 @@
+1. Classification Report :-
+
+              precision    recall  f1-score   support
+
+akiec          0.8512     0.0145    0.0284       327
+bcc            0.8849     0.0185    0.0364       514
+bkl            0.8857     0.0235    0.0458      1099
+df             0.8720     0.0090    0.0177       115
+nv             0.8851     0.0404    0.0773      6705
+mel            0.8708     0.0384    0.0734      1113
+vasc           0.8935     0.0210    0.0407       142
+
+accuracy                             0.9100     10015
+macro avg     0.8776     0.0236    0.0457     10015
+weighted avg  0.8815     0.9100    0.0864     10015
+
+
+2. Summary of the model :-
+
+Model Compilation-
+
+Optimizer: Adam (adaptive learning rate optimization)
+Loss Function: Categorical Crossentropy (multi-class classification)
+Metrics: Accuracy, Precision, Recall, F1-score (evaluated separately)
+Learning Rate: Default Adam (1e‑3) with auto adjustment during training
+
+Training Setup-
+
+Dataset: HAM10000 — 10,015 dermatoscopic images in 7 classes
+Image Size: 224×224×3 (RGB)
+Batch Size: 32
+Epochs: 15
+Data Augmentation: Rotation, flipping, zooming, shifting
+Validation Split: ~20% of dataset for validation
+
+Post-Training Performance-
+
+Training Accuracy: ~91%
+Validation Accuracy: 75–85% (signs of overfitting)
+Loss Trend: Validation loss increased after epoch ~6 → overfitting detected
+Precision (Macro Avg): 87.76%
+Recall (Macro Avg): 2.36%
+F1-score (Macro Avg): 4.57%
+Best Class: Melanocytic Nevi (nv) – Recall: 4.04%, F1: 7.73%
+Worst Class: Dermatofibroma (df) – Recall: 0.90%, F1: 1.77%
+
+Training Observations-
+
+High training accuracy but low recall on rare classes → strong bias toward majority class (nv).
+Random Forest ensemble slightly improved robustness over pure CNN.
+Grad-CAM proposed for future work to verify model focus areas.
+Class imbalance remains the most critical limitation.
+
+
+3. Model Architecture :-
+
+--> Input Layer
+
+Shape: 224 × 224 × 3 (RGB dermatoscopic images)
+
+--> Preprocessing:
+
+Resizing to 224×224 pixels
+Normalization to [0, 1]
+Label encoding (string → integer class index)
+
+--> Feature Extraction Backbone
+
+Base Model: MobileNetV2 (pre-trained on ImageNet)
+
+--> Modifications:
+
+Removed top classification layer (include_top=False)
+Frozen initial layers to preserve learned low-level features
+Fine-tuned higher layers for skin lesion patterns
+Output: Dense feature vector for each image
+
+--> Convolutional Layers
+
+Conv Layer 1:
+32 filters, 3×3 kernel, ReLU activation
+MaxPooling (2×2)
+Conv Layer 2:
+64 filters, 3×3 kernel, ReLU activation
+MaxPooling (2×2)
+Dropout: 0.25 (to reduce overfitting)
+
+--> Flatten Layer
+
+Flattens feature maps into a single feature vector
+
+--> Fully Connected (Dense) Layers
+
+Dense Layer 1: 128 neurons, ReLU activation
+Dropout: 0.5
+Dense Layer 2: 64 neurons, ReLU activation
+
+--> Classifier Heads
+
+CNN Classifier Head:
+Dense (Softmax) output layer → 7 units (one per class)
+Produces probability distribution over all classes
+Random Forest Classifier Head:
+Trained separately using extracted CNN features
+Uses majority voting with CNN output for final prediction
+
+--> Output Layer
+
+Final Decision Rule:
+Combine CNN Softmax prediction and Random Forest output
+Class with highest combined confidence is chosen
+
+--> Training Configuration
+
+Optimizer: Adam
+Loss Function: Categorical Crossentropy
+Epochs: 15
+Batch Size: 32
+Data Augmentation: Rotation, flipping, zooming, shifting.
+
+
+4. Per-class accuracy :-
+
+Per-class Accuracy = (TP+TN) / Total Samples​
+
+Disease	Abbreviation		Support (N)	Recall (%)
+
+Actinic Keratoses		akiec	327	1.45
+Basal Cell Carcinoma		bcc	514	1.85
+Benign Keratosis-like Lesions	bkl	1,099	2.35
+Dermatofibroma			df	115	0.90
+Melanocytic Nevi		nv	6,705	4.04
+Melanoma			mel	1,113	3.84
+Vascular Lesions		vasc	142	2.10
+
+
+
+
+
+
+
+

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skin Disease Detection</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'), linear-gradient(to bottom right, #d0f0fd, #f0fcff);
+      background-blend-mode: overlay;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-10">
+  <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-3xl p-8 max-w-lg w-full border border-blue-200">
+    <h1 class="text-3xl font-extrabold text-center text-blue-800 mb-6">🩺 Skin Disease Detector</h1>
+
+    <!-- Upload Box -->
+    <div class="flex items-center justify-center w-full mb-5">
+      <label for="imageUpload" class="flex flex-col items-center justify-center w-full h-60 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition duration-200 overflow-hidden relative">
+        <input id="imageUpload" type="file" accept="image/*" class="hidden" onchange="previewImage(event)" />
+        <div id="uploadContent" class="flex flex-col items-center justify-center pt-5 pb-6">
+          <svg class="w-10 h-10 mb-3 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4a1 1 0 011-1h8a1 1 0 011 1v12M7 16l-4 4m0 0h18m-4-4l4 4" />
+          </svg>
+          <p class="mb-2 text-sm text-blue-700"><span class="font-semibold">Click to upload</span> or drag & drop</p>
+          <p class="text-xs text-blue-600">Image preview will appear here</p>
+        </div>
+        <img id="preview" src="#" alt="Preview" class="absolute top-0 left-0 w-full h-full object-cover hidden rounded-lg" />
+      </label>
+    </div>
+
+    <!-- Predict Button -->
+    <button onclick="predictDisease()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-lg transition">
+      🔍 Predict Disease
+    </button>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center text-blue-600 mt-4 hidden">
+      ⏳ Predicting...
+    </div>
+
+    <!-- Results -->
+    <div id="result" class="mt-6 hidden bg-green-50 border border-green-200 rounded-xl p-4">
+      <p class="text-lg font-medium text-green-700"><strong>Disease:</strong> <span id="diseaseName"></span></p>
+      <p class="text-lg font-medium text-green-700"><strong>Confidence:</strong> <span id="confidence"></span>%</p>
+      <p class="text-green-800 mt-2"><strong>Cure:</strong> <span id="cure"></span></p>
+    </div>
+  </div>
+
+  <script>
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById("preview");
+      const uploadContent = document.getElementById("uploadContent");
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.classList.remove("hidden");
+          uploadContent.classList.add("hidden");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function predictDisease() {
+      const imageInput = document.getElementById("imageUpload");
+      const file = imageInput.files[0];
+      const loading = document.getElementById("loading");
+      const resultBox = document.getElementById("result");
+
+      if (!file) {
+        alert("Please select an image first.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      loading.classList.remove("hidden");
+      resultBox.classList.add("hidden");
+
+      fetch("http://localhost:5000/predict", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("diseaseName").innerText = data.disease;
+        document.getElementById("confidence").innerText = (data.confidence * 100).toFixed(2);
+        document.getElementById("cure").innerText = data.cure;
+
+        resultBox.classList.remove("hidden");
+        loading.classList.add("hidden");
+      })
+      .catch(err => {
+        loading.classList.add("hidden");
+        alert("⚠️ Could not connect to backend. Please check your Flask server.");
+        console.error(err);
+      });
+    }
+  </script>
+</body>
+</html>
