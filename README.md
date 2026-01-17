@@ -1,2 +1,8 @@
 # Skin_Disease_Detection_Project
 Here a deep learning approach is presented which automatically identifies and classifies seven common skin diseases using dermatoscopic images. A model is trained by Convolutional Neural Network (CNN) on a carefully selected dataset of over 10,000 labeled images. Metrics such as Accuracy, Precision, Recall, F1-Score are used to assess the model’s performance, and loss which after being trained gives an accuracy of 91 percent. In this research work, a Web page has also been developed for better user interaction. While the results are promising, challenges like class imbalance and overfitting still exist. Additionally, further future improvements have been discussed which will help to boost the dependability of this model while also increasing its potential to apply in the real-world medical field.
+
+# Dataset
+Source: Kaggle
+Link: https://www.kaggle.com/datasets/kmader/skin-cancer-mnist-ham10000
+Total Images: 10000+
+Classes: 7
